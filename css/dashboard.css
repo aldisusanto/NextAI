@@ -1,0 +1,245 @@
+/* ==========================================================================
+   DASHBOARD / SYSTEM OVERVIEW
+   ========================================================================== */
+.dashboard-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-dark);
+  height: 100%;
+  overflow-y: auto;
+  padding: 40px;
+  position: relative;
+  min-width: 0;
+  color: var(--text-primary);
+}
+
+.dashboard-area.hidden {
+  display: none !important;
+}
+
+.dashboard-header {
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.dashboard-title h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.dashboard-title p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+.dashboard-time {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Dashboard Grid Layout */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dashboard Cards */
+.dash-card {
+  background-color: rgba(20, 20, 25, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-smooth);
+}
+
+.dash-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(25, 25, 30, 0.6);
+}
+
+.dash-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.dash-card-header svg {
+  color: var(--accent); /* Teal/cyan color */
+}
+
+/* Metrics Grid (2x2) inside Energy Monitoring */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.metric-box {
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all var(--transition-fast);
+}
+
+.metric-box:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.metric-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.metric-label svg {
+  color: var(--accent);
+  width: 14px;
+  height: 14px;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.metric-unit {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-weight: 400;
+}
+
+/* Cost Comparison List */
+.cost-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cost-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  transition: all var(--transition-fast);
+}
+
+.cost-item.highlight {
+  background-color: rgba(20, 184, 166, 0.08); /* Teal with low opacity */
+  border: 1px solid rgba(20, 184, 166, 0.3);
+}
+
+.cost-item.highlight .cost-model {
+  color: var(--text-primary);
+}
+
+.cost-item.highlight .cost-amount {
+  color: var(--accent);
+}
+
+.cost-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cost-item-left svg {
+  color: var(--text-tertiary);
+}
+
+.cost-item.highlight .cost-item-left svg {
+  color: var(--accent);
+}
+
+.cost-model {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.cost-details {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+.cost-item-right {
+  text-align: right;
+}
+
+.cost-amount {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.cost-savings {
+  font-size: 11px;
+  color: var(--green);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.cost-note {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-top: auto;
+  padding-top: 24px;
+  line-height: 1.5;
+}
+
+/* Trace Debugger */
+.dash-card.full-width {
+  min-height: 300px;
+}
+
+.trace-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}

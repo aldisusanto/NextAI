@@ -1,0 +1,170 @@
+<div class="setup-header">
+  <div class="setup-title-container">
+    <h2>System Setup & Downloads</h2>
+    <p>
+      Manage required dependencies and download local AI models to run
+      completely offline on your hardware.
+    </p>
+  </div>
+</div>
+
+<!-- System Status Card -->
+<div class="setup-status-card" id="ollama-status-card">
+  <div class="status-left">
+    <div class="status-icon-bg" id="ollama-status-icon">
+      <i data-lucide="server"></i>
+    </div>
+    <div>
+      <h3 id="ollama-status-title">Checking Ollama Engine...</h3>
+      <p id="ollama-status-desc">Verifying connection to localhost:11434</p>
+    </div>
+  </div>
+  <button class="setup-action-btn" id="btn-refresh-ollama">Refresh</button>
+</div>
+
+<div class="setup-section-title mt-32">Required Dependencies</div>
+<div class="setup-grid">
+  <!-- Nomic Embed -->
+  <div class="setup-model-card" id="card-nomic-embed-text">
+    <div class="setup-model-header">
+      <div>
+        <h3>Nomic Embed Text</h3>
+        <p class="model-meta">274 MB &middot; Required for Data Sources</p>
+      </div>
+      <span class="badge badge-purple">Core</span>
+    </div>
+    <p class="model-desc">
+      Text embedding model essential for RAG (Retrieval-Augmented Generation).
+      Allows the AI to search through your local files.
+    </p>
+
+    <div class="setup-model-actions">
+      <button class="setup-btn-download" data-model="nomic-embed-text">
+        <i data-lucide="download"></i> Download
+      </button>
+    </div>
+
+    <div class="setup-progress-container hidden" id="prog-nomic-embed-text">
+      <div class="setup-progress-bar">
+        <div class="setup-progress-fill" style="width: 0%"></div>
+      </div>
+      <div class="setup-progress-text">0%</div>
+    </div>
+  </div>
+</div>
+
+<div class="setup-section-title mt-32">Recommended Chat Models</div>
+<div class="setup-grid">
+  <!-- Qwen 2 -->
+  <div class="setup-model-card" id="card-qwen2:0.5b">
+    <div class="setup-model-header">
+      <div>
+        <h3>Qwen 2 (0.5B)</h3>
+        <p class="model-meta">352 MB &middot; Ultra Fast</p>
+      </div>
+      <span class="badge badge-green">Recommended</span>
+    </div>
+    <p class="model-desc">
+      Extremely lightweight and fast model by Alibaba. Perfect for older
+      MacBooks or quick, simple queries without draining battery.
+    </p>
+
+    <div class="setup-model-actions">
+      <button class="setup-btn-download" data-model="qwen2:0.5b">
+        <i data-lucide="download"></i> Download
+      </button>
+    </div>
+
+    <div class="setup-progress-container hidden" id="prog-qwen2:0.5b">
+      <div class="setup-progress-bar">
+        <div class="setup-progress-fill" style="width: 0%"></div>
+      </div>
+      <div class="setup-progress-text">0%</div>
+    </div>
+  </div>
+
+  <!-- Llama 3 -->
+  <div class="setup-model-card" id="card-llama3">
+    <div class="setup-model-header">
+      <div>
+        <h3>Llama 3 (8B)</h3>
+        <p class="model-meta">4.7 GB &middot; High Quality</p>
+      </div>
+      <span class="badge badge-outline">Popular</span>
+    </div>
+    <p class="model-desc">
+      Meta's flagship open model. Provides GPT-3.5 level intelligence entirely
+      offline. Requires at least 8GB of unified memory.
+    </p>
+
+    <div class="setup-model-actions">
+      <button class="setup-btn-download" data-model="llama3">
+        <i data-lucide="download"></i> Download
+      </button>
+    </div>
+
+    <div class="setup-progress-container hidden" id="prog-llama3">
+      <div class="setup-progress-bar">
+        <div class="setup-progress-fill" style="width: 0%"></div>
+      </div>
+      <div class="setup-progress-text">0%</div>
+    </div>
+  </div>
+</div>
+
+<div class="setup-section-title mt-32">Other Supported Models</div>
+<div class="setup-grid">
+  <!-- Mistral -->
+  <div class="setup-model-card" id="card-mistral">
+    <div class="setup-model-header">
+      <div>
+        <h3>Mistral (7B)</h3>
+        <p class="model-meta">4.1 GB &middot; Balanced</p>
+      </div>
+    </div>
+    <p class="model-desc">
+      A highly efficient model by Mistral AI. Great alternative to Llama 3 with
+      strong reasoning capabilities.
+    </p>
+
+    <div class="setup-model-actions">
+      <button class="setup-btn-download" data-model="mistral">
+        <i data-lucide="download"></i> Download
+      </button>
+    </div>
+
+    <div class="setup-progress-container hidden" id="prog-mistral">
+      <div class="setup-progress-bar">
+        <div class="setup-progress-fill" style="width: 0%"></div>
+      </div>
+      <div class="setup-progress-text">0%</div>
+    </div>
+  </div>
+
+  <!-- Gemma -->
+  <div class="setup-model-card" id="card-gemma:2b">
+    <div class="setup-model-header">
+      <div>
+        <h3>Gemma (2B)</h3>
+        <p class="model-meta">1.7 GB &middot; Lightweight</p>
+      </div>
+    </div>
+    <p class="model-desc">
+      Google's open model built from the same research as Gemini. Good balance
+      of speed and size for mid-range hardware.
+    </p>
+
+    <div class="setup-model-actions">
+      <button class="setup-btn-download" data-model="gemma:2b">
+        <i data-lucide="download"></i> Download
+      </button>
+    </div>
+
+    <div class="setup-progress-container hidden" id="prog-gemma:2b">
+      <div class="setup-progress-bar">
+        <div class="setup-progress-fill" style="width: 0%"></div>
+      </div>
+      <div class="setup-progress-text">0%</div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,354 @@
+<div class="data-header">
+  <div class="data-title-container">
+    <h2>Settings</h2>
+    <p>App preferences — appearance, model defaults, keyboard shortcuts, and data management.</p>
+  </div>
+</div>
+
+<div class="settings-container" style="max-width: 1000px; padding-bottom: 50px;">
+  
+  <!-- APPEARANCE -->
+  <div class="settings-card">
+    <div class="settings-card-header">
+      <h3>Appearance</h3>
+    </div>
+    <div class="settings-card-body">
+      <!-- Theme -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <label>Theme</label>
+          <p>Choose how NextAI looks</p>
+        </div>
+        <div class="setting-controls">
+          <div class="theme-selector">
+            <button class="theme-btn" data-theme="light"><i data-lucide="sun"></i> Light</button>
+            <button class="theme-btn active" data-theme="dark"><i data-lucide="moon"></i> Dark</button>
+            <button class="theme-btn" data-theme="system"><i data-lucide="monitor"></i> System</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Font Size -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <label>Font size</label>
+        </div>
+        <div class="setting-controls">
+          <select id="font-size-select" class="settings-select" style="width: auto;">
+            <option value="small">Small</option>
+            <option value="default">Default</option>
+            <option value="large">Large</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONNECTION -->
+  <div class="settings-card mt-24">
+    <div class="settings-card-header">
+      <h3>Connection</h3>
+    </div>
+    <div class="settings-card-body">
+      <!-- Provider Select -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <label>AI Provider</label>
+          <p>Choose the engine powering your AI</p>
+        </div>
+        <div class="setting-controls">
+          <select id="provider-select" class="settings-select">
+            <option value="ollama">Ollama (Lokal Offline)</option>
+            <option value="deepseek">DeepSeek API (Cloud)</option>
+            <option value="openai">OpenAI API (Cloud)</option>
+            <option value="groq">Groq API (Cloud)</option>
+            <option value="custom">Kustom OpenAI-Compatible</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Server Status -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <label>Server status</label>
+          <p id="current-active-model-text">ollama / loading...</p>
+        </div>
+        <div class="setting-controls">
+          <span class="status-badge status-online" style="background: transparent;">
+            <span class="status-dot connected"></span>
+            <span class="status-text" style="color: var(--text-secondary);">Connected</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- API URL -->
+      <div class="setting-row" id="api-host-group">
+        <div class="setting-info">
+          <label>API URL</label>
+          <p>Set if backend runs on a different port or host</p>
+        </div>
+        <div class="setting-controls">
+          <input type="text" id="api-host-input" class="settings-input" placeholder="http://localhost:11434" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODELS & API KEYS -->
+  <div class="settings-card mt-24">
+    <div class="settings-card-header">
+      <h3>Models</h3>
+    </div>
+    <div class="settings-card-body">
+      <!-- Local Models -->
+      <div class="setting-row" style="align-items: flex-start;">
+        <div class="setting-info">
+          <label>Selected Model</label>
+          <p>Models available for inference</p>
+          <div style="font-family: monospace; font-size: 11px; color: var(--text-tertiary); margin-top: 8px; background: var(--surface-1); padding: 4px 8px; border-radius: 4px; display: inline-block;">Run `ollama run <model-name>` in your terminal to add more models</div>
+        </div>
+        <div class="setting-controls" style="flex-direction: column; align-items: flex-end; gap: 8px;">
+          <select id="model-select" class="settings-select">
+            <!-- Populated by JS -->
+          </select>
+          <input type="text" id="custom-model-input" class="settings-input hidden" placeholder="Nama model kustom..." />
+        </div>
+      </div>
+
+      <!-- API Key -->
+      <div class="setting-row hidden" id="api-key-group">
+        <div class="setting-info">
+          <label>API Key</label>
+          <p>Requires active internet connection</p>
+        </div>
+        <div class="setting-controls">
+          <input type="password" id="api-key-input" class="settings-input" placeholder="sk-..." />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENT & BEHAVIOR -->
+  <div class="settings-card mt-24">
+    <div class="settings-card-header">
+      <h3>Agent & Behavior</h3>
+    </div>
+    <div class="settings-card-body">
+      <!-- System Prompt -->
+      <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+        <div class="setting-info">
+          <label>System Prompt</label>
+          <p>Define the character and persona of the assistant.</p>
+        </div>
+        <div class="setting-controls" style="width: 100%;">
+          <textarea id="system-prompt" class="settings-input" rows="4" style="width: 100%; height: auto; resize: vertical;" placeholder="Karakter asisten..."></textarea>
+        </div>
+      </div>
+
+      <!-- RAG Format -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <label>Response Format (Memory)</label>
+          <p>How the AI should format answers when searching memory or news</p>
+        </div>
+        <div class="setting-controls">
+          <select id="rag-format-select" class="settings-select">
+            <option value="natural">Natural (Contextual)</option>
+            <option value="list">Force Bulleted Lists</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPEECH -->
+  <div class="settings-card mt-24">
+    <div class="settings-card-header">
+      <h3>Speech</h3>
+    </div>
+    <div class="settings-card-body">
+      <!-- TTS Toggle -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <label>Text-to-Speech (TTS)</label>
+          <p>Enable AI voice dictation</p>
+        </div>
+        <div class="setting-controls">
+          <label class="switch">
+            <input type="checkbox" id="tts-toggle" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Voice Selection -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <label>Voice Model</label>
+          <p>Select the neural voice to use</p>
+        </div>
+        <div class="setting-controls">
+          <select id="voice-select" class="settings-select">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA -->
+  <div class="settings-card mt-24">
+    <div class="settings-card-header">
+      <h3>Data</h3>
+    </div>
+    <div class="settings-card-body">
+      <!-- Clear Chat -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <label>Clear all chats</label>
+          <p>Permanently delete all conversations</p>
+        </div>
+        <div class="setting-controls">
+          <button id="clear-chat-btn" class="settings-action-btn danger-btn">
+            <i data-lucide="trash-2" style="width:14px; height:14px; margin-right:4px;"></i> Clear
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOWNLOADS (From original setup.html) -->
+  <div class="settings-card mt-24">
+    <div class="settings-card-header">
+      <h3>Model Downloads</h3>
+    </div>
+    <div class="settings-card-body" style="padding: 16px;">
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">Manage required dependencies and download local AI models to run completely offline.</p>
+      
+      <div class="setup-section-title">Recommended Models</div>
+      <div class="setup-grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); margin-top: 12px;">
+        <!-- Nomic Embed -->
+        <div class="setup-model-card" id="card-nomic-embed-text">
+          <div class="setup-model-header">
+            <div>
+              <h3 style="font-size: 14px; margin-bottom: 4px;">Nomic Embed Text</h3>
+              <p class="model-meta">274 MB &middot; Required for Data Sources</p>
+            </div>
+            <span class="badge badge-purple">Core</span>
+          </div>
+          <p class="model-desc" style="font-size: 13px; color: var(--text-secondary); margin: 8px 0;">Required text embedding model for RAG and semantic search to work.</p>
+          <div class="setup-model-actions" style="margin-top: 12px;">
+            <button class="setup-btn-download" data-model="nomic-embed-text">
+              <i data-lucide="download"></i> Download
+            </button>
+          </div>
+          <div class="setup-progress-container hidden" id="prog-nomic-embed-text">
+            <div class="setup-progress-bar"><div class="setup-progress-fill" style="width: 0%"></div></div>
+            <div class="setup-progress-text">0%</div>
+          </div>
+        </div>
+
+        <!-- Qwen 2 -->
+        <div class="setup-model-card" id="card-qwen2:0.5b">
+          <div class="setup-model-header">
+            <div>
+              <h3 style="font-size: 14px; margin-bottom: 4px;">Qwen 2 (0.5B)</h3>
+              <p class="model-meta">352 MB &middot; Ultra Fast</p>
+            </div>
+            <span class="badge badge-green">Recommended</span>
+          </div>
+          <p class="model-desc" style="font-size: 13px; color: var(--text-secondary); margin: 8px 0;">Extremely lightweight and fast model. Perfect for older MacBooks or quick queries.</p>
+          <div class="setup-model-actions" style="margin-top: 12px;">
+            <button class="setup-btn-download" data-model="qwen2:0.5b">
+              <i data-lucide="download"></i> Download
+            </button>
+          </div>
+          <div class="setup-progress-container hidden" id="prog-qwen2:0.5b">
+            <div class="setup-progress-bar"><div class="setup-progress-fill" style="width: 0%"></div></div>
+            <div class="setup-progress-text">0%</div>
+          </div>
+        </div>
+
+        <!-- Llama 3 -->
+        <div class="setup-model-card" id="card-llama3">
+          <div class="setup-model-header">
+            <div>
+              <h3 style="font-size: 14px; margin-bottom: 4px;">Llama 3 (8B)</h3>
+              <p class="model-meta">4.7 GB &middot; High Quality</p>
+            </div>
+            <span class="badge badge-outline">Popular</span>
+          </div>
+          <p class="model-desc" style="font-size: 13px; color: var(--text-secondary); margin: 8px 0;">Meta's flagship open model. Provides GPT-3.5 level intelligence entirely offline.</p>
+          <div class="setup-model-actions" style="margin-top: 12px;">
+            <button class="setup-btn-download" data-model="llama3">
+              <i data-lucide="download"></i> Download
+            </button>
+          </div>
+          <div class="setup-progress-container hidden" id="prog-llama3">
+            <div class="setup-progress-bar"><div class="setup-progress-fill" style="width: 0%"></div></div>
+            <div class="setup-progress-text">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-section-title" style="margin-top: 24px;">Other Supported Models</div>
+      <div class="setup-grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); margin-top: 12px;">
+        <!-- Mistral -->
+        <div class="setup-model-card" id="card-mistral">
+          <div class="setup-model-header">
+            <div>
+              <h3 style="font-size: 14px; margin-bottom: 4px;">Mistral (7B)</h3>
+              <p class="model-meta">4.1 GB &middot; Balanced</p>
+            </div>
+          </div>
+          <p class="model-desc" style="font-size: 13px; color: var(--text-secondary); margin: 8px 0;">A highly efficient model by Mistral AI. Great alternative to Llama 3 with strong reasoning.</p>
+          <div class="setup-model-actions" style="margin-top: 12px;">
+            <button class="setup-btn-download" data-model="mistral">
+              <i data-lucide="download"></i> Download
+            </button>
+          </div>
+          <div class="setup-progress-container hidden" id="prog-mistral">
+            <div class="setup-progress-bar"><div class="setup-progress-fill" style="width: 0%"></div></div>
+            <div class="setup-progress-text">0%</div>
+          </div>
+        </div>
+
+        <!-- Gemma -->
+        <div class="setup-model-card" id="card-gemma:2b">
+          <div class="setup-model-header">
+            <div>
+              <h3 style="font-size: 14px; margin-bottom: 4px;">Gemma (2B)</h3>
+              <p class="model-meta">1.7 GB &middot; Lightweight</p>
+            </div>
+          </div>
+          <p class="model-desc" style="font-size: 13px; color: var(--text-secondary); margin: 8px 0;">Google's open model built from the same research as Gemini. Good balance of speed and size.</p>
+          <div class="setup-model-actions" style="margin-top: 12px;">
+            <button class="setup-btn-download" data-model="gemma:2b">
+              <i data-lucide="download"></i> Download
+            </button>
+          </div>
+          <div class="setup-progress-container hidden" id="prog-gemma:2b">
+            <div class="setup-progress-bar"><div class="setup-progress-fill" style="width: 0%"></div></div>
+            <div class="setup-progress-text">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Download Section -->
+      <div class="setup-section-title" style="margin-top: 32px; border-top: 1px solid var(--border-subtle); padding-top: 24px;">Download Any Model</div>
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Enter the name of any model from the <a href="#" style="color: var(--blue);" onclick="require('electron').shell.openExternal('https://ollama.com/library')">Ollama Library</a> (e.g., <code>phi3:mini</code>, <code>gemma3:12b</code>).</p>
+      
+      <div style="display: flex; gap: 12px; align-items: stretch; max-width: 500px;">
+        <input type="text" id="custom-download-input" class="settings-input" placeholder="Enter model name..." style="flex: 1;" />
+        <button id="btn-custom-download" class="settings-action-btn primary">
+          <i data-lucide="download"></i> Download
+        </button>
+      </div>
+      <div class="setup-progress-container hidden" id="prog-custom-download" style="max-width: 500px; margin-top: 12px; border-radius: 8px; background: var(--bg-dark); padding: 12px;">
+        <div class="setup-progress-bar"><div class="setup-progress-fill" style="width: 0%"></div></div>
+        <div class="setup-progress-text" style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; text-align: right;">0%</div>
+      </div>
+
+    </div>
+  </div>
+</div>

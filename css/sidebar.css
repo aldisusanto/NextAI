@@ -1,0 +1,303 @@
+/* ==========================================================================
+   SIDEBAR
+   ========================================================================== */
+.global-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.global-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+}
+
+.global-toggle-btn i {
+  width: 20px;
+  height: 20px;
+}
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  transition:
+    transform var(--transition-smooth),
+    opacity var(--transition-smooth);
+}
+
+.sidebar.closed {
+  transform: translateX(-280px);
+  position: absolute;
+  height: 100%;
+  opacity: 0;
+}
+
+/* Sidebar Top Actions */
+.sidebar-top-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 12px 12px 8px 60px;
+}
+
+.sidebar-top-right {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.sidebar-icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.sidebar-icon-btn:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+}
+
+.sidebar-icon-btn i {
+  width: 16px;
+  height: 16px;
+}
+
+/* Model Selector */
+.sidebar-model-selector {
+  padding: 4px 12px 12px;
+}
+
+.model-select-btn {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+}
+
+.model-select-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.model-icon {
+  width: 15px;
+  height: 15px;
+  color: var(--text-primary);
+}
+
+#current-model-name {
+  flex: 1;
+  text-align: left;
+  color: var(--text-primary);
+}
+
+.model-shortcut {
+  font-size: 10px;
+  padding: 2px 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  color: var(--text-tertiary);
+  font-family: inherit;
+}
+
+/* Sidebar Search */
+.sidebar-search {
+  padding: 0 12px 12px;
+  position: relative;
+}
+
+.sidebar-search .search-icon {
+  position: absolute;
+  left: 22px;
+  top: calc(50% - 6px);
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.sidebar-search input {
+  width: 100%;
+  padding: 8px 10px 8px 38px;
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.sidebar-search input:focus {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Sidebar Chat History */
+.sidebar-chats-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chat-history-item {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.chat-history-item:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.chat-history-item.active {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.chat-history-item-link {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  overflow: hidden;
+  width: calc(100% - 24px);
+}
+
+.chat-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-time {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.delete-chat-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  opacity: 0;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.chat-history-item:hover .delete-chat-btn {
+  opacity: 1;
+}
+
+.delete-chat-btn:hover {
+  color: var(--red);
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.delete-chat-btn i {
+  width: 13px;
+  height: 13px;
+}
+
+/* Sidebar Navigation */
+.sidebar-nav {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  border-left: 3px solid transparent;
+}
+
+.nav-item i {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+}
+
+.nav-item:hover i {
+  opacity: 1;
+}
+
+.nav-item.active {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  border-left-color: var(--accent);
+}
+
+.nav-item.active i {
+  color: var(--accent);
+  opacity: 1;
+}

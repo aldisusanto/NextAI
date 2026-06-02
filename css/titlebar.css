@@ -1,0 +1,168 @@
+/* ==========================================================================
+   CUSTOM TITLEBAR — NextAI Desktop
+   Only visible when running in Electron (Linux frameless mode)
+   macOS uses native hidden titlebar, Windows uses titleBarOverlay
+   ========================================================================== */
+
+/* Titlebar container */
+.electron-titlebar {
+  display: none; /* Hidden by default, shown via JS for Linux */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  z-index: 9999;
+  background: linear-gradient(135deg, #0f0e26 0%, #141333 100%);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.15);
+  -webkit-app-region: drag; /* Make entire bar draggable */
+  user-select: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  font-family: "Outfit", sans-serif;
+}
+
+/* Show titlebar on Linux (frameless) */
+body.electron-linux .electron-titlebar {
+  display: flex;
+}
+
+/* Push app content down when titlebar is visible */
+body.electron-linux .app-container {
+  padding-top: 40px;
+}
+
+/* macOS: add padding for native traffic lights (inset titlebar) */
+body.electron-mac .sidebar {
+  padding-top: 0px;
+}
+
+body.electron-mac .chat-header {
+  padding-top: 0px;
+}
+
+body.electron-mac:has(.sidebar.closed) .chat-header {
+  padding-left: 76px;
+}
+
+body.electron-mac .sidebar-top-actions {
+  padding-top: 14px;
+  padding-left: 116px;
+}
+
+/* Title text */
+.titlebar-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary, #a5b4fc);
+  letter-spacing: 0.3px;
+}
+
+.titlebar-title .titlebar-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+}
+
+/* Window control buttons (Linux only) */
+.titlebar-controls {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  -webkit-app-region: no-drag; /* Make buttons clickable */
+}
+
+.titlebar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #a5b4fc);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+  -webkit-app-region: no-drag;
+}
+
+.titlebar-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary, #e0e7ff);
+}
+
+.titlebar-btn.close:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.titlebar-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 1.5;
+}
+
+/* Maximize icon state toggle */
+.titlebar-btn .maximize-icon-restore {
+  display: none;
+}
+
+.titlebar-btn.maximized .maximize-icon {
+  display: none;
+}
+
+.titlebar-btn.maximized .maximize-icon-restore {
+  display: block;
+}
+
+/* ==========================================================================
+   ELECTRON-SPECIFIC GLOBAL ADJUSTMENTS
+   ========================================================================== */
+
+/* Disable text selection on UI chrome (not content areas) */
+body.is-electron .sidebar,
+body.is-electron .chat-header,
+body.is-electron .chat-footer,
+body.is-electron .modal-header,
+body.is-electron .modal-footer {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Keep text selectable in content areas */
+body.is-electron .message-bubble,
+body.is-electron textarea,
+body.is-electron input,
+body.is-electron .modal-body {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Smooth window transitions */
+body.is-electron {
+  overflow: hidden;
+}
+
+/* Custom scrollbar for Electron (more native feel) */
+body.is-electron ::-webkit-scrollbar {
+  width: 6px;
+}
+
+body.is-electron ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body.is-electron ::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.2);
+  border-radius: 3px;
+}
+
+body.is-electron ::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.4);
+}

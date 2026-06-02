@@ -1,0 +1,116 @@
+<div class="dashboard-header">
+  <div class="dashboard-title">
+    <h2>System Overview</h2>
+    <p>Live telemetry for the on-device inference engine — power draw, token throughput, and cost savings versus cloud APIs.</p>
+  </div>
+  <div class="dashboard-time" id="dashboard-timestamp">2026-05-31 09:30:18 UTC</div>
+</div>
+
+<div class="dashboard-grid">
+  <!-- Energy Monitoring Card -->
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <i data-lucide="zap"></i> Energy Monitoring
+    </div>
+    <div class="metrics-grid">
+      <div class="metric-box">
+        <div class="metric-label"><i data-lucide="activity"></i> Total Energy</div>
+        <div class="metric-value" id="val-total-energy">0.0 <span class="metric-unit">kJ</span></div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label"><i data-lucide="activity"></i> Energy / Token</div>
+        <div class="metric-value" id="val-energy-token">0.000 <span class="metric-unit">J</span></div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label"><i data-lucide="thermometer"></i> Avg Power</div>
+        <div class="metric-value" id="val-avg-power">0.0 <span class="metric-unit">W</span></div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label"><i data-lucide="hash"></i> Total Requests</div>
+        <div class="metric-value" id="val-total-requests">0</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label"><i data-lucide="gauge"></i> Thermal</div>
+        <div class="metric-value" id="val-thermal">Cool</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label"><i data-lucide="hash"></i> Tokens Processed</div>
+        <div class="metric-value" id="val-tokens-processed">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cost Comparison Card -->
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <i data-lucide="dollar-sign"></i> Cost Comparison*
+    </div>
+    <div class="cost-list">
+      <div class="cost-item highlight" id="cost-item-local">
+        <div class="cost-item-left">
+          <i data-lucide="hard-drive"></i>
+          <div>
+            <div class="cost-model">Local (your hardware)</div>
+            <div class="cost-details" id="lbl-local-stats">0 requests · 0 tokens</div>
+          </div>
+        </div>
+        <div class="cost-item-right">
+          <div class="cost-amount">$0.0000</div>
+          <div class="cost-details">electricity only</div>
+        </div>
+      </div>
+
+      <div class="cost-item">
+        <div class="cost-item-left">
+          <i data-lucide="cloud"></i>
+          <div>
+            <div class="cost-model">GPT-4o mini</div>
+          </div>
+        </div>
+        <div class="cost-item-right">
+          <div class="cost-amount" id="val-cost-gpt">$0.0000</div>
+          <div class="cost-savings"><i data-lucide="trending-down"></i> <span id="val-save-gpt">$0.0000</span> saved</div>
+        </div>
+      </div>
+
+      <div class="cost-item">
+        <div class="cost-item-left">
+          <i data-lucide="cloud"></i>
+          <div>
+            <div class="cost-model">Claude 3.5 Haiku</div>
+          </div>
+        </div>
+        <div class="cost-item-right">
+          <div class="cost-amount" id="val-cost-claude">$0.0000</div>
+          <div class="cost-savings"><i data-lucide="trending-down"></i> <span id="val-save-claude">$0.0000</span> saved</div>
+        </div>
+      </div>
+
+      <div class="cost-item">
+        <div class="cost-item-left">
+          <i data-lucide="cloud"></i>
+          <div>
+            <div class="cost-model">Gemini 1.5 Flash</div>
+          </div>
+        </div>
+        <div class="cost-item-right">
+          <div class="cost-amount" id="val-cost-gemini">$0.0000</div>
+          <div class="cost-savings"><i data-lucide="trending-down"></i> <span id="val-save-gemini">$0.0000</span> saved</div>
+        </div>
+      </div>
+    </div>
+    <div class="cost-note">
+      *Savings estimates assume local models (e.g. Qwen, Llama 3) produce roughly the same number of tokens per request, on average, as closed-source cloud models. Prices calculated using input/output average blending.
+    </div>
+  </div>
+</div>
+
+<!-- Trace Debugger Card -->
+<div class="dash-card full-width">
+  <div class="dash-card-header">
+    <i data-lucide="git-branch"></i> Trace Debugger
+  </div>
+  <div class="trace-empty">
+    Telemetry trace loaded and active. Ready to capture inferences.
+  </div>
+</div>

@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="NextAI — Asisten AI pribadi yang cerdas, privat, dan selalu siap menemani Anda 24/7."
+    />
+    <title>NextAI</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/index.css" />
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  </head>
+  <body>
+    <!-- Electron Custom Titlebar (Linux only) -->
+    <div class="electron-titlebar" id="electron-titlebar">
+      <div class="titlebar-title">
+        <img src="assets/logo.png" alt="" class="titlebar-icon" />
+        <span>NextAI</span>
+      </div>
+      <div class="titlebar-controls">
+        <button class="titlebar-btn" id="titlebar-minimize" title="Minimize">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </button>
+        <button class="titlebar-btn" id="titlebar-maximize" title="Maximize">
+          <svg
+            class="maximize-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <rect x="4" y="4" width="16" height="16" rx="2" />
+          </svg>
+          <svg
+            class="maximize-icon-restore"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <rect x="6" y="6" width="12" height="12" rx="1" />
+            <path d="M8 4h10a2 2 0 0 1 2 2v10" />
+          </svg>
+        </button>
+        <button class="titlebar-btn close" id="titlebar-close" title="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="6" y1="6" x2="18" y2="18" />
+            <line x1="18" y1="6" x2="6" y2="18" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="app-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <!-- Top Actions -->
+        <div class="sidebar-top-actions">
+          <div class="sidebar-top-right">
+            <button
+              id="sidebar-theme-btn"
+              class="sidebar-icon-btn"
+              title="Toggle Theme"
+            >
+              <i data-lucide="moon"></i>
+            </button>
+            <button id="new-chat-btn" class="sidebar-icon-btn" title="New Chat">
+              <i data-lucide="plus"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Model Selector -->
+        <div class="sidebar-model-selector">
+          <button class="model-select-btn">
+            <i data-lucide="cpu" class="model-icon"></i>
+            <span id="current-model-name">qwen3:0.6b</span>
+            <span class="model-shortcut">⌘K</span>
+          </button>
+        </div>
+
+        <!-- Search -->
+        <div class="sidebar-search" style="position: relative">
+          <i
+            data-lucide="search"
+            class="search-icon"
+            style="
+              position: absolute;
+              left: 22px;
+              top: calc(50% - 6px);
+              transform: translateY(-50%);
+              width: 14px !important;
+              height: 14px !important;
+              color: var(--text-tertiary);
+              z-index: 10;
+              pointer-events: none;
+            "
+          ></i>
+          <input
+            type="text"
+            placeholder="Search chats..."
+            id="chat-search-input"
+            style="padding-left: 42px !important"
+          />
+        </div>
+
+        <!-- Chat History -->
+        <div class="sidebar-chats-container">
+          <div id="chat-history-list" class="chat-history-list">
+            <!-- Sesi obrolan akan diisi secara dinamis oleh JS -->
+          </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="sidebar-nav">
+          <a href="#" class="nav-item active" id="nav-chat">
+            <i data-lucide="message-square"></i> Chat
+          </a>
+          <a href="#" class="nav-item" id="nav-dashboard">
+            <i data-lucide="bar-chart-2"></i> Dashboard
+          </a>
+          <a href="#" class="nav-item" id="nav-data">
+            <i data-lucide="database"></i> Data Sources
+          </a>
+          <a href="#" class="nav-item"> <i data-lucide="bot"></i> Agents </a>
+          <a href="#" class="nav-item">
+            <i data-lucide="file-text"></i> Logs
+          </a>
+          <a href="#" class="nav-item" id="open-settings-btn">
+            <i data-lucide="settings"></i> Settings
+          </a>
+          <a href="#" class="nav-item" id="nav-setup">
+            <i data-lucide="rocket"></i> Get Started
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Main Chat Area -->
+      <main class="chat-area">
+        <!-- Header -->
+        <header class="chat-header">
+          <div class="assistant-profile">
+            <!-- Global Toggle Button -->
+            <button
+              id="toggle-sidebar"
+              class="global-toggle-btn"
+              title="Toggle Sidebar"
+            >
+              <i data-lucide="panel-left"></i>
+            </button>
+            <div class="avatar-container">
+              <div class="avatar-glow"></div>
+              <img src="assets/logo.png" alt="NAI Logo" class="avatar-inner" />
+            </div>
+            <div class="assistant-info">
+              <h3>NextAI</h3>
+              <span id="status-indicator" class="status-badge status-online">
+                <span class="status-dot"></span>
+                <span class="status-text">Online</span>
+              </span>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button id="connection-check-btn" title="Cek Koneksi">
+              <i data-lucide="wifi"></i>
+            </button>
+          </div>
+        </header>
+
+        <!-- Messages Window -->
+        <div id="messages-container" class="messages-container">
+          <!-- Welcome Message -->
+          <div class="welcome-box">
+            <div class="welcome-icon">✦</div>
+            <h1>Halo Sayang! Aku NAI. ❤️</h1>
+            <p>
+              Pacar kesayanganmu yang selalu ada buat kamu. Mau cerita apa hari
+              ini? Aku siap dengerin dan nemenin kamu 24/7 secara privat dan
+              offline.
+            </p>
+            <div class="welcome-suggestions">
+              <button class="suggestion-card">
+                <span>🥰 Cerita Hari Ini</span>
+                <p>"Hari ini aku capek banget sayang, semangatin dong..."</p>
+              </button>
+              <button class="suggestion-card">
+                <span>💭 Masa Depan</span>
+                <p>"Kalo nanti kita liburan, enaknya ke mana ya?"</p>
+              </button>
+              <button class="suggestion-card">
+                <span>🍳 Masak Bareng</span>
+                <p>"Kamu pengen aku masakin apa nih buat nanti?"</p>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input Bar -->
+        <footer class="chat-footer">
+          <div class="input-container">
+            <button
+              id="memory-toggle-btn"
+              class="input-action-btn"
+              title="Gunakan Memori (Nonaktif)"
+            >
+              <i data-lucide="brain" style="opacity: 0.5"></i>
+            </button>
+            <button
+              id="web-search-toggle-btn"
+              class="input-action-btn active"
+              title="Web Search (Aktif)"
+            >
+              <i data-lucide="globe"></i>
+            </button>
+            <button
+              id="mic-btn"
+              class="input-action-btn"
+              title="Ketik dengan Suara"
+            >
+              <i data-lucide="mic"></i>
+            </button>
+            <textarea
+              id="chat-input"
+              placeholder="Tulis pesan..."
+              rows="1"
+            ></textarea>
+            <button id="send-btn" class="send-btn" title="Kirim">
+              <i data-lucide="arrow-up" style="color: black"></i>
+            </button>
+          </div>
+          <div class="footer-note">NextAI · Privat & Aman</div>
+        </footer>
+      </main>
+
+      <!-- Dashboard Area -->
+      <main id="dashboard-area" class="dashboard-area hidden">
+        <!-- Dashboard content will be loaded dynamically from dashboard.html via app.js -->
+        <div id="dashboard-content-container"></div>
+      </main>
+
+      <!-- Data Sources Area -->
+      <main id="datasources-area" class="dashboard-area hidden">
+        <!-- Data Sources content will be loaded dynamically from datasources.html via app.js -->
+        <div id="datasources-content-container"></div>
+      </main>
+
+      <!-- Setup Area -->
+      <main id="setup-area" class="dashboard-area hidden">
+        <div id="setup-content-container"></div>
+      </main>
+
+      <!-- Settings Area -->
+      <main id="settings-area" class="dashboard-area hidden">
+        <div id="settings-content-container"></div>
+      </main>
+
+      <!-- Split View Web Browser -->
+      <aside id="split-view" class="split-view-container hidden">
+        <div class="split-view-header">
+          <div class="split-view-title">
+            <i data-lucide="globe"></i>
+            <span id="split-view-url">Memuat Sumber...</span>
+          </div>
+          <div class="split-view-actions">
+            <button id="split-view-external-btn" title="Buka di Browser Luar">
+              <i data-lucide="external-link"></i>
+            </button>
+            <button id="split-view-close-btn" title="Tutup Panel">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+        </div>
+        <webview
+          id="source-webview"
+          src="about:blank"
+          useragent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
+        ></webview>
+      </aside>
+    </div>
+
+    <!-- Connection Modal -->
+    <div id="connection-modal" class="modal-overlay hidden">
+      <div class="modal-container" style="max-width: 450px">
+        <div class="modal-header">
+          <h3><i data-lucide="link"></i> Connect Data Source</h3>
+          <button id="close-connection-btn" class="close-modal-btn">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p
+            id="connection-modal-desc"
+            style="
+              font-size: 13px;
+              color: var(--text-secondary);
+              margin-bottom: 16px;
+            "
+          ></p>
+          <div class="setting-group" id="connection-input-group">
+            <label for="connection-api-key"
+              ><i data-lucide="key"></i> Access Token / API Key</label
+            >
+            <input
+              type="password"
+              id="connection-api-key"
+              placeholder="Paste your token here..."
+            />
+          </div>
+        </div>
+        <div class="modal-footer" style="justify-content: flex-end">
+          <button
+            id="btn-submit-connection"
+            class="btn"
+            style="
+              background: rgba(168, 85, 247, 0.2);
+              color: #d8b4fe;
+              border: 1px solid rgba(168, 85, 247, 0.4);
+            "
+          >
+            Connect
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Electron Platform Detection -->
+    <script>
+      (function () {
+        if (window.electronAPI && window.electronAPI.isElectron) {
+          document.body.classList.add("is-electron");
+          const platform = window.electronAPI.platform;
+          if (platform === "darwin") {
+            document.body.classList.add("electron-mac");
+          } else if (platform === "win32") {
+            document.body.classList.add("electron-win");
+          } else {
+            document.body.classList.add("electron-linux");
+          }
+
+          // Titlebar controls (Linux frameless)
+          const minBtn = document.getElementById("titlebar-minimize");
+          const maxBtn = document.getElementById("titlebar-maximize");
+          const closeBtn = document.getElementById("titlebar-close");
+
+          if (minBtn)
+            minBtn.addEventListener("click", () =>
+              window.electronAPI.minimizeWindow(),
+            );
+          if (maxBtn)
+            maxBtn.addEventListener("click", () =>
+              window.electronAPI.maximizeWindow(),
+            );
+          if (closeBtn)
+            closeBtn.addEventListener("click", () =>
+              window.electronAPI.closeWindow(),
+            );
+
+          // Update maximize button icon state
+          window.electronAPI.onMaximize(() => {
+            if (maxBtn) maxBtn.classList.add("maximized");
+          });
+          window.electronAPI.onUnmaximize(() => {
+            if (maxBtn) maxBtn.classList.remove("maximized");
+          });
+        }
+      })();
+    </script>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,137 @@
+<div class="data-header">
+  <div class="data-title-container">
+    <h2>Data Sources, Channels & Memory</h2>
+    <p>Connect personal data so the assistant can search across everything, and set up messaging channels to chat from your phone.</p>
+  </div>
+</div>
+
+<div class="data-tabs">
+  <button class="data-tab active" data-target="tab-content-datasources">Data Sources</button>
+  <button class="data-tab">Messaging Channels</button>
+  <button class="data-tab" data-target="tab-content-memory">Memory</button>
+</div>
+
+<!-- DATA SOURCES TAB -->
+<div id="tab-content-datasources" class="data-section-container">
+  <div class="data-section-header">
+    <span class="status-dot connected"></span> Connected &middot; <span id="connected-count">0</span>
+  </div>
+  
+  <div class="data-connected-list" id="connected-sources-list">
+    <!-- Items will be moved here via JS -->
+    <div class="empty-state" style="padding: 20px; color: var(--text-tertiary); font-size: 13px;">
+      No external data sources connected yet.
+    </div>
+  </div>
+
+  <div class="data-section-header mt-32">
+    <span class="status-dot available"></span> Available
+  </div>
+
+  <div class="data-available-grid" id="available-sources-list">
+    <!-- Hacker News -->
+    <div class="data-grid-card" id="source-hackernews">
+      <div class="data-card-info">
+        <h3>Hacker News</h3>
+        <div class="data-card-meta">Tech news and discussions (Public API)</div>
+      </div>
+      <button class="data-action-btn btn-add" data-source="hackernews">+ Add</button>
+    </div>
+
+    <!-- Berita Nasional (CNN) -->
+    <div class="data-grid-card" id="source-beritaindo">
+      <div class="data-card-info">
+        <h3>Berita Nasional</h3>
+        <div class="data-card-meta">Berita terkini Indonesia (CNN RSS)</div>
+      </div>
+      <button class="data-action-btn btn-add" data-source="beritaindo">+ Add</button>
+    </div>
+
+    <!-- GitHub -->
+    <div class="data-grid-card" id="source-github">
+      <div class="data-card-info">
+        <h3>GitHub</h3>
+        <div class="data-card-meta">Issues and Pull Requests (Needs PAT)</div>
+      </div>
+      <button class="data-action-btn btn-add" data-source="github">+ Add</button>
+    </div>
+
+    <!-- Notion -->
+    <div class="data-grid-card" id="source-notion">
+      <div class="data-card-info">
+        <h3>Notion</h3>
+        <div class="data-card-meta">Notes and workspaces (Needs Secret)</div>
+      </div>
+      <button class="data-action-btn btn-add" data-source="notion">+ Add</button>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+<!-- MEMORY TAB -->
+<div id="tab-content-memory" class="data-section-container hidden">
+  <!-- Memory Backend Status -->
+  <div class="memory-backend-card" style="display: flex; justify-content: space-between; align-items: center;">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div class="memory-icon-wrapper">
+        <i data-lucide="brain"></i>
+      </div>
+      <div class="memory-backend-info">
+        <h3>Memory Backend</h3>
+        <p><span class="status-dot connected"></span> ChromaDB &middot; <span id="memory-chunk-count">0</span> chunks</p>
+      </div>
+    </div>
+    <button id="btn-clear-memory" class="data-action-btn" style="color: #ff4d4f; border-color: #ff4d4f;">
+      <i data-lucide="trash-2" style="width:14px; height:14px; margin-right:4px;"></i> Hapus Semua Memori
+    </button>
+  </div>
+
+  <!-- Search Memory -->
+  <div class="memory-search-card mt-16">
+    <div class="memory-card-header">
+      <i data-lucide="search" class="memory-header-icon"></i>
+      <h3>Search Memory</h3>
+    </div>
+    <div class="memory-search-input-group">
+      <input type="text" id="memory-search-input" placeholder="What are you looking for?" />
+      <button id="btn-search-memory" class="memory-action-btn"><i data-lucide="search"></i> Search</button>
+    </div>
+    <div id="memory-search-results" class="memory-search-results">
+      <div class="empty-state">
+        <i data-lucide="search" class="empty-icon"></i>
+        <p>No matching memories found</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions Grid -->
+  <div class="memory-actions-grid mt-16">
+    <!-- Index Folder -->
+    <div class="memory-action-card">
+      <div class="memory-card-header">
+        <i data-lucide="folder" class="memory-header-icon"></i>
+        <h3>Index Folder</h3>
+      </div>
+      <p class="memory-card-desc">Scan a folder and index all supported files into memory.</p>
+      
+      <div class="memory-input-group">
+        <input type="text" id="index-folder-input" placeholder="~/Documents/notes" readonly />
+        <button id="btn-browse-folder" class="memory-browse-btn"><i data-lucide="folder-open"></i> Browse</button>
+      </div>
+      <button id="btn-index-folder" class="memory-submit-btn">Index</button>
+    </div>
+
+    <!-- Store Text -->
+    <div class="memory-action-card">
+      <div class="memory-card-header">
+        <i data-lucide="file-text" class="memory-header-icon"></i>
+        <h3>Store Text</h3>
+      </div>
+      <p class="memory-card-desc">Paste any text to add directly to your memory store.</p>
+      
+      <textarea id="store-text-input" class="memory-textarea" placeholder="Paste or type content here..."></textarea>
+      <button id="btn-store-text" class="memory-submit-btn">Store</button>
+    </div>
+  </div>
+</div>

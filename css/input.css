@@ -1,0 +1,120 @@
+/* ==========================================================================
+   INPUT BOX & FOOTER
+   ========================================================================== */
+.chat-footer {
+  padding: 12px 24px 20px;
+  background: linear-gradient(to top, var(--bg-dark) 60%, transparent);
+  position: relative;
+}
+
+.input-container {
+  background-color: var(--bg-dark);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: flex-end;
+  padding: 6px 8px;
+  gap: 4px;
+  transition: border-color var(--transition-fast);
+}
+
+.input-container:focus-within {
+  border-color: var(--text-tertiary);
+}
+
+.input-action-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.input-action-btn:hover {
+  color: var(--text-secondary);
+  background-color: var(--accent-surface);
+}
+
+.input-action-btn.active {
+  color: var(--blue);
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.input-action-btn.active:hover {
+  background-color: rgba(59, 130, 246, 0.15);
+}
+
+#mic-btn.listening {
+  color: white;
+  background-color: var(--red);
+  animation: mic-pulse 1.5s infinite alternate;
+}
+
+#chat-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 8px 4px;
+  max-height: 120px;
+  line-height: 1.5;
+  resize: none;
+}
+
+#chat-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.send-btn {
+  background: linear-gradient(
+    135deg,
+    var(--accent) 0%,
+    var(--accent-hover) 100%
+  );
+  color: white;
+  border: none;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+.send-btn:hover {
+  box-shadow: 0 4px 16px var(--accent-glow-strong);
+  transform: scale(1.05);
+}
+
+.send-btn:active {
+  transform: scale(0.95);
+}
+
+.send-btn i {
+  width: 16px;
+  height: 16px;
+}
+
+.footer-note {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 8px;
+  opacity: 0.5;
+}
+
+

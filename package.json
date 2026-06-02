@@ -1,0 +1,76 @@
+{
+  "name": "nemesis-ai",
+  "version": "1.0.0",
+  "description": "NextAI — Asisten AI pribadi yang cerdas, privat, dan selalu siap menemani Anda 24/7.",
+  "main": "electron-main.js",
+  "author": "NAI Developer",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "com.nemesis.nai",
+    "productName": "NextAI",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!node_modules/.cache/**",
+      "!*.onnx"
+    ],
+    "extraResources": [
+      {
+        "from": "server.py",
+        "to": "server.py"
+      },
+      {
+        "from": "id_ID-news_tts-medium.onnx",
+        "to": "id_ID-news_tts-medium.onnx"
+      },
+      {
+        "from": "id_ID-news_tts-medium.onnx.json",
+        "to": "id_ID-news_tts-medium.onnx.json"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "assets/logo.png",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "icon": "assets/logo.png",
+      "target": [
+        "nsis"
+      ]
+    },
+    "linux": {
+      "icon": "assets/logo.png",
+      "target": [
+        "AppImage"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/logo.png",
+      "uninstallerIcon": "assets/logo.png"
+    }
+  },
+  "dependencies": {
+    "systeminformation": "^5.31.7"
+  }
+}

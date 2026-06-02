@@ -1,0 +1,82 @@
+/* ==========================================================================
+   DESIGN SYSTEM & VARIABLES
+   ========================================================================== */
+:root {
+  color-scheme: dark;
+  --chat-font-size: 14px;
+  /* Flatter, pure black backgrounds */
+  --bg-dark: #000000;
+  --bg-surface: #0a0a0a;
+  --bg-elevated: #111111;
+  --bg-sidebar: #050505;
+  --bg-glass: rgba(10, 10, 10, 0.85);
+
+  /* Ultra-subtle borders */
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-hover: rgba(255, 255, 255, 0.1);
+
+  /* Monochromatic stark accents (white/gray) */
+  --accent: #ffffff;
+  --accent-hover: #e5e5e5;
+  --accent-glow: transparent;
+  --accent-glow-strong: transparent;
+  --accent-surface: rgba(255, 255, 255, 0.04);
+  --accent-muted: #888888;
+
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --blue: #3b82f6;
+  --red: #ef4444;
+
+  /* High contrast text */
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #52525b;
+  --text-inverse: #000000;
+
+  /* Flat solid bubbles instead of gradients */
+  --bubble-user: #27272a;
+  --bubble-ai: transparent;
+
+  /* Sharper or simpler border radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Remove heavy shadows, use flat design */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-glow: none;
+
+  --transition-fast: 0.15s ease-out;
+  --transition-smooth: 0.25s ease-out;
+  --transition-spring: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg-dark: #f9fafb;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f3f4f6;
+  --bg-sidebar: #f8fafc;
+  --bg-glass: rgba(255, 255, 255, 0.85);
+
+  --border-subtle: rgba(0, 0, 0, 0.05);
+  --border-hover: rgba(0, 0, 0, 0.1);
+
+  --accent: #000000;
+  --accent-hover: #1f2937;
+  --accent-surface: rgba(0, 0, 0, 0.04);
+  --accent-muted: #6b7280;
+
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-tertiary: #9ca3af;
+  --text-inverse: #ffffff;
+
+  --bubble-user: #e5e7eb;
+  --bubble-ai: transparent;
+}
