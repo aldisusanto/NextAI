@@ -30,6 +30,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Platform info
   platform: process.platform,
 
+  // Overlay & Screen Capture API
+  captureScreen: () => ipcRenderer.invoke('capture-screen'),
+  hideOverlay: () => ipcRenderer.send('hide-overlay'),
+  toggleOverlay: () => ipcRenderer.send('toggle-overlay'),
+  onOverlayShown: (callback) => ipcRenderer.on('overlay-shown', callback),
+
+  // Dynamic Global Shortcut API
+  getGlobalShortcut: () => ipcRenderer.invoke('get-global-shortcut'),
+  setGlobalShortcut: (newShortcut) => ipcRenderer.invoke('set-global-shortcut', newShortcut),
+  openScreenSettings: () => ipcRenderer.invoke('open-screen-settings'),
+
   // Check if running in Electron
   isElectron: true
 });
+

@@ -44,6 +44,26 @@
     </div>
   </div>
 
+  <!-- SHORTCUT & HOTKEYS -->
+  <div class="settings-card mt-24">
+    <div class="settings-card-header">
+      <h3>Global Shortcut (Spotlight Copilot)</h3>
+    </div>
+    <div class="settings-card-body">
+      <div class="setting-row">
+        <div class="setting-info">
+          <label>Spotlight Overlay Hotkey</label>
+          <p>Pintas tombol global untuk membuka NextAI Spotlight di atas aplikasi apa pun</p>
+        </div>
+        <div class="setting-controls" style="display: flex; gap: 8px; align-items: center;">
+          <input type="text" id="shortcut-key-input" class="settings-input" style="width: 180px; font-family: monospace; font-weight: 600;" placeholder="Contoh: Option+Space" />
+          <button id="save-shortcut-btn" class="settings-action-btn" style="background: #8b5cf6; color: #fff; border: none; border-radius: 6px; padding: 8px 14px; font-weight: 600; cursor: pointer;">Simpan</button>
+        </div>
+      </div>
+      <div id="shortcut-msg" style="font-size: 12px; margin-top: 6px; color: #94a3b8;">Format contoh: <code>Option+Space</code>, <code>Alt+Space</code>, <code>Control+Space</code>, <code>Command+Shift+K</code>, <code>F12</code>.</div>
+    </div>
+  </div>
+
   <!-- CONNECTION -->
   <div class="settings-card mt-24">
     <div class="settings-card-header">
@@ -62,6 +82,7 @@
             <option value="deepseek">DeepSeek API (Cloud)</option>
             <option value="openai">OpenAI API (Cloud)</option>
             <option value="groq">Groq API (Cloud)</option>
+            <option value="anthropic">Claude / Anthropic (Cloud)</option>
             <option value="custom">Kustom OpenAI-Compatible</option>
           </select>
         </div>

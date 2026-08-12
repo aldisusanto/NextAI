@@ -1,7 +1,7 @@
 // ==========================================================================
 // ELECTRON MAIN PROCESS — NextAI Desktop App
 // ==========================================================================
-const { app, BrowserWindow, ipcMain, Notification, Menu, Tray, nativeImage, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, Notification, Menu, Tray, nativeImage, dialog, globalShortcut, desktopCapturer, screen, systemPreferences } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const http = require('http');
@@ -21,6 +21,7 @@ const WINDOW_DEFAULT_WIDTH = 1200;
 const WINDOW_DEFAULT_HEIGHT = 800;
 
 let mainWindow = null;
+let overlayWindow = null;
 let pythonProcess = null;
 let tray = null;
 let isQuitting = false;
@@ -285,6 +286,126 @@ function createMainWindow() {
 }
 
 // ==========================================================================
+// FLOATING OVERLAY WINDOW (SPOTLIGHT COPILOT)
+// ==========================================================================
+
+function createOverlayWindow() {
+  if (overlayWindow && !overlayWindow.isDestroyed()) return;
+
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width } = primaryDisplay.workAreaSize;
+
+  overlayWindow = new BrowserWindow({
+    width: 760,
+    height: 480,
+    x: Math.round((width - 760) / 2),
+    y: 90,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    resizable: true,
+    show: false,
+    backgroundColor: '#00000000',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    }
+  });
+
+  overlayWindow.loadURL(`http://localhost:${SERVER_PORT}/overlay.html`);
+
+  // Ensure window floats globally above all other OS applications & fullscreen spaces
+  overlayWindow.setAlwaysOnTop(true, 'screen-saver');
+  if (process.platform === 'darwin') {
+    overlayWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  }
+
+  overlayWindow.on('closed', () => {
+    overlayWindow = null;
+  });
+}
+
+function toggleOverlayWindow() {
+  if (!overlayWindow || overlayWindow.isDestroyed()) {
+    createOverlayWindow();
+  }
+
+  if (overlayWindow.isVisible()) {
+    overlayWindow.hide();
+  } else {
+    const mousePos = screen.getCursorScreenPoint();
+    const currentDisplay = screen.getDisplayNearestPoint(mousePos);
+    const { x, y, width } = currentDisplay.workArea;
+
+    overlayWindow.setPosition(
+      Math.round(x + (width - 760) / 2),
+      y + 90
+    );
+
+    if (process.platform === 'darwin') {
+      overlayWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    }
+    overlayWindow.setAlwaysOnTop(true, 'screen-saver');
+    overlayWindow.show();
+    overlayWindow.focus();
+    overlayWindow.webContents.send('overlay-shown');
+  }
+}
+
+// ==========================================================================
+// DYNAMIC GLOBAL SHORTCUT MANAGEMENT
+// ==========================================================================
+
+let currentShortcut = process.platform === 'darwin' ? 'Option+Space' : 'Alt+Space';
+
+function getShortcutConfigPath() {
+  return path.join(app.getPath('userData'), 'shortcut-config.json');
+}
+
+function loadSavedShortcut() {
+  try {
+    const configPath = getShortcutConfigPath();
+    if (require('fs').existsSync(configPath)) {
+      const data = JSON.parse(require('fs').readFileSync(configPath, 'utf-8'));
+      if (data && data.shortcut) {
+        currentShortcut = data.shortcut;
+      }
+    }
+  } catch (e) {
+    console.warn('[Electron] Could not load saved shortcut config:', e.message);
+  }
+  return currentShortcut;
+}
+
+function applyGlobalShortcut(newShortcut) {
+  try {
+    globalShortcut.unregisterAll();
+    const registered = globalShortcut.register(newShortcut, () => {
+      toggleOverlayWindow();
+    });
+
+    if (registered) {
+      currentShortcut = newShortcut;
+      try {
+        require('fs').writeFileSync(getShortcutConfigPath(), JSON.stringify({ shortcut: newShortcut }));
+      } catch (e) {
+        console.warn('[Electron] Could not save shortcut config:', e.message);
+      }
+      console.log(`[Electron] Global shortcut updated to: ${newShortcut}`);
+      return { success: true, shortcut: newShortcut };
+    } else {
+      console.warn(`[Electron] Failed to register new shortcut: ${newShortcut}`);
+      return { success: false, error: `Gagal meregistrasi shortcut '${newShortcut}'. Mungkin digunakan aplikasi lain.` };
+    }
+  } catch (err) {
+    console.error(`[Electron] Error registering shortcut ${newShortcut}:`, err);
+    return { success: false, error: err.message };
+  }
+}
+
+// ==========================================================================
 // APPLICATION MENU
 // ==========================================================================
 
@@ -477,6 +598,137 @@ function setupIpcHandlers() {
       return filePaths[0];
     }
   });
+
+  // Overlay Window & Screen Capture controls
+  ipcMain.on('hide-overlay', () => {
+    if (overlayWindow && !overlayWindow.isDestroyed()) {
+      overlayWindow.hide();
+    }
+  });
+
+  ipcMain.on('toggle-overlay', () => {
+    toggleOverlayWindow();
+  });
+
+  ipcMain.handle('open-screen-settings', () => {
+    const { shell } = require('electron');
+    if (process.platform === 'darwin') {
+      shell.openExternal('x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture');
+    }
+  });
+
+  ipcMain.handle('capture-screen', async () => {
+    // Check macOS Screen Recording permission status first
+    if (process.platform === 'darwin' && systemPreferences && systemPreferences.getMediaAccessStatus) {
+      const status = systemPreferences.getMediaAccessStatus('screen');
+      console.log(`[Electron] macOS Screen Recording Permission status: ${status}`);
+      if (status === 'denied') {
+        const { shell } = require('electron');
+        shell.openExternal('x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture');
+        return {
+          error: 'permission_required',
+          message: 'Akses Screen Recording macOS ditolak/belum diizinkan.\n\nSystem Settings -> Privacy & Security -> Screen Recording telah dibuka. Harap beri centang/aktifkan izin untuk "Electron" atau "Terminal", lalu restart aplikasi.'
+        };
+      }
+    }
+
+    // Hide overlay window briefly so it doesn't block/cover the application underneath
+    const wasVisible = overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible();
+    if (wasVisible) {
+      overlayWindow.hide();
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    let result = null;
+    const mousePoint = screen.getCursorScreenPoint();
+    const currentDisplay = screen.getDisplayNearestPoint(mousePoint);
+    const allDisplays = screen.getAllDisplays();
+    const displayIndex = Math.max(1, allDisplays.findIndex(d => d.id === currentDisplay.id) + 1);
+
+    // 1. Native macOS screencapture CLI targeting the current active display index
+    if (process.platform === 'darwin') {
+      const fs = require('fs');
+      const tmpPath = path.join(app.getPath('temp'), `nextai_snap_${Date.now()}.png`);
+      try {
+        const { execSync } = require('child_process');
+        execSync(`/usr/sbin/screencapture -x -D ${displayIndex} "${tmpPath}"`);
+        if (fs.existsSync(tmpPath)) {
+          const imgBuffer = fs.readFileSync(tmpPath);
+          fs.unlinkSync(tmpPath); // Delete temp file immediately
+          if (imgBuffer.length > 1000) {
+            console.log(`[Electron] Native macOS screen capture successful for Display #${displayIndex}`);
+            result = `data:image/png;base64,${imgBuffer.toString('base64')}`;
+          }
+        }
+      } catch (err) {
+        console.warn(`[Electron] Native macOS screencapture for Display #${displayIndex} failed, trying default screencapture...`, err ? err.message : err);
+        if (fs.existsSync(tmpPath)) {
+          try { fs.unlinkSync(tmpPath); } catch (e) {}
+        }
+      }
+
+      // Fallback: default screencapture without -D
+      if (!result) {
+        const tmpPath2 = path.join(app.getPath('temp'), `nextai_snap_fallback_${Date.now()}.png`);
+        try {
+          const { execSync } = require('child_process');
+          execSync(`/usr/sbin/screencapture -x "${tmpPath2}"`);
+          if (fs.existsSync(tmpPath2)) {
+            const imgBuffer = fs.readFileSync(tmpPath2);
+            fs.unlinkSync(tmpPath2);
+            if (imgBuffer.length > 1000) {
+              result = `data:image/png;base64,${imgBuffer.toString('base64')}`;
+            }
+          }
+        } catch (e) {
+          if (fs.existsSync(tmpPath2)) { try { fs.unlinkSync(tmpPath2); } catch (err2) {} }
+        }
+      }
+    }
+
+    // 2. Electron desktopCapturer fallback matching targetDisplay.id
+    if (!result) {
+      try {
+        if (process.platform === 'darwin' && systemPreferences && systemPreferences.getMediaAccessStatus) {
+          const status = systemPreferences.getMediaAccessStatus('screen');
+          if (status === 'not-determined' && systemPreferences.askForMediaAccess) {
+            await systemPreferences.askForMediaAccess('screen');
+          }
+        }
+
+        const sources = await desktopCapturer.getSources({
+          types: ['screen', 'window'],
+          thumbnailSize: { width: 1440, height: 900 }
+        });
+        if (sources && sources.length > 0) {
+          const targetDisplayIdStr = String(currentDisplay.id);
+          const screenSource = sources.find(s => s.display_id === targetDisplayIdStr || s.id.includes(targetDisplayIdStr))
+            || sources.find(s => s.id.startsWith('screen:') || (!s.name.includes('NextAI') && !s.name.includes('Spotlight')))
+            || sources[0];
+          result = screenSource.thumbnail.toDataURL();
+        }
+      } catch (err) {
+        console.error('[Electron] Screen capture fallback failed:', err ? err.message : err);
+      }
+    }
+
+    // Restore overlay window
+    if (wasVisible && overlayWindow && !overlayWindow.isDestroyed()) {
+      overlayWindow.show();
+      overlayWindow.focus();
+    }
+
+    return result;
+  });
+
+  // Dynamic Global Shortcut Handlers
+  ipcMain.handle('get-global-shortcut', () => {
+    return currentShortcut;
+  });
+
+  ipcMain.handle('set-global-shortcut', (event, newShortcut) => {
+    return applyGlobalShortcut(newShortcut);
+  });
 }
 
 // ==========================================================================
@@ -512,6 +764,10 @@ if (!gotTheLock) {
     // Setup IPC handlers
     setupIpcHandlers();
 
+    // Load & Register Global Hotkey
+    loadSavedShortcut();
+    applyGlobalShortcut(currentShortcut);
+
     // Create application menu
     createAppMenu();
 
@@ -520,11 +776,11 @@ if (!gotTheLock) {
       await startPythonServer();
     } catch (err) {
       console.error('[Electron] Python server failed to start:', err.message);
-      // Continue anyway — user can still use cloud APIs and browser TTS
     }
 
-    // Create main window
+    // Create main window & pre-create overlay window
     createMainWindow();
+    createOverlayWindow();
 
     // Create system tray
     createTray();
@@ -546,6 +802,7 @@ if (!gotTheLock) {
   });
 
   app.on('will-quit', () => {
+    globalShortcut.unregisterAll();
     stopPythonServer();
   });
 

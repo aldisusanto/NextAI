@@ -43,6 +43,12 @@ const PROVIDER_MODELS = {
     { value: "gemma2-9b-it", text: "Gemma 2 9B" },
     { value: "custom", text: "Kustom..." },
   ],
+  anthropic: [
+    { value: "claude-sonnet-4-20250514", text: "Claude Sonnet 4 - Cerdas & Cepat" },
+    { value: "claude-opus-4-20250514", text: "Claude Opus 4 - Paling Cerdas" },
+    { value: "claude-3-5-haiku-20241022", text: "Claude 3.5 Haiku - Ringan & Murah" },
+    { value: "custom", text: "Kustom..." },
+  ],
   custom: [{ value: "custom", text: "Kustom..." }],
 };
 
@@ -53,6 +59,10 @@ const PROVIDER_DEFAULTS = {
   groq: {
     host: "https://api.groq.com/openai/v1",
     model: "llama-3.3-70b-versatile",
+  },
+  anthropic: {
+    host: "https://api.anthropic.com",
+    model: "claude-sonnet-4-20250514",
   },
   custom: { host: "", model: "" },
 };
@@ -903,26 +913,61 @@ async function sendMessage() {
   const host = apiHostInput.value.trim();
   const apiKey = apiKeyInput.value.trim();
 
-  // Unified Chat Completion URL: ${host}/chat/completions
-  const url = `${host}/chat/completions`;
+  // Unified Chat Completion URL
+  let url;
+  const isAnthropic = provider === "anthropic";
+  if (isAnthropic) {
+    url = `${host}/v1/messages`;
+  } else {
+    url = `${host}/chat/completions`;
+  }
 
   // Headers
   const headers = {
     "Content-Type": "application/json",
   };
-  if (provider !== "ollama" && apiKey) {
+  if (isAnthropic && apiKey) {
+    headers["x-api-key"] = apiKey;
+    headers["anthropic-version"] = "2023-06-01";
+    headers["anthropic-dangerous-direct-browser-access"] = "true";
+  } else if (provider !== "ollama" && apiKey) {
     headers["Authorization"] = `Bearer ${apiKey}`;
   }
 
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify({
+    let requestBody;
+    if (isAnthropic) {
+      // Anthropic format: extract system messages, convert to Anthropic message format
+      let systemPrompt = "";
+      const anthropicMessages = [];
+      for (const msg of historyToSend) {
+        if (msg.role === "system") {
+          systemPrompt += (systemPrompt ? "\n\n" : "") + msg.content;
+        } else {
+          anthropicMessages.push({ role: msg.role, content: msg.content });
+        }
+      }
+      requestBody = {
+        model: model,
+        max_tokens: 4096,
+        stream: true,
+        messages: anthropicMessages,
+      };
+      if (systemPrompt) {
+        requestBody.system = systemPrompt;
+      }
+    } else {
+      requestBody = {
         model: model,
         messages: historyToSend,
         stream: true,
-      }),
+      };
+    }
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
@@ -965,7 +1010,24 @@ async function sendMessage() {
             }
             try {
               const parsed = JSON.parse(dataStr);
-              if (
+
+              // Anthropic streaming format
+              if (isAnthropic) {
+                if (parsed.type === "content_block_delta" && parsed.delta && parsed.delta.text) {
+                  const content = parsed.delta.text;
+                  aiResponseText += content;
+                  if (window.marked) {
+                    bubble.innerHTML = marked.parse(aiResponseText);
+                  } else {
+                    bubble.textContent = aiResponseText;
+                  }
+                  scrollToBottom();
+                } else if (parsed.type === "message_stop") {
+                  done = true;
+                }
+              }
+              // OpenAI-compatible streaming format
+              else if (
                 parsed.choices &&
                 parsed.choices[0].delta &&
                 parsed.choices[0].delta.content
@@ -982,6 +1044,9 @@ async function sendMessage() {
             } catch (e) {
               // Suppress json parsing errors on partial chunks
             }
+          } else if (cleanLine.startsWith("event: ")) {
+            // Anthropic sends event lines before data lines, skip them
+            continue;
           }
         }
       }
@@ -2227,6 +2292,39 @@ function setupSettingsInteractions() {
     });
   });
 
+  // Setup Global Shortcut Listener
+  const shortcutInput = document.getElementById("shortcut-key-input");
+  const saveShortcutBtn = document.getElementById("save-shortcut-btn");
+  const shortcutMsg = document.getElementById("shortcut-msg");
+
+  if (shortcutInput && window.electronAPI && window.electronAPI.getGlobalShortcut) {
+    window.electronAPI.getGlobalShortcut().then((sc) => {
+      if (sc) shortcutInput.value = sc;
+    });
+
+    if (saveShortcutBtn) {
+      saveShortcutBtn.addEventListener("click", async () => {
+        const newSc = shortcutInput.value.trim();
+        if (!newSc) return;
+        saveShortcutBtn.disabled = true;
+        saveShortcutBtn.innerText = "...";
+        try {
+          const res = await window.electronAPI.setGlobalShortcut(newSc);
+          if (res && res.success) {
+            shortcutMsg.innerHTML = `<span style="color:#10b981;">✅ Shortcut berhasil diubah ke <code>${res.shortcut}</code>!</span>`;
+          } else {
+            shortcutMsg.innerHTML = `<span style="color:#ef4444;">⚠️ ${res.error || 'Gagal meregistrasi shortcut.'}</span>`;
+          }
+        } catch (err) {
+          shortcutMsg.innerHTML = `<span style="color:#ef4444;">⚠️ ${err.message}</span>`;
+        } finally {
+          saveShortcutBtn.disabled = false;
+          saveShortcutBtn.innerText = "Simpan";
+        }
+      });
+    }
+  }
+
   // Re-attach Event Listeners
   if (providerSelect)
     providerSelect.addEventListener("change", handleProviderChange);
@@ -2685,3 +2783,8 @@ function applyFontSize(size) {
     root.style.setProperty("--chat-font-size", "14px"); // default
   }
 }
+
+let tacAnalysisInterval = null;
+let humanityAnalysisInterval = null;
+const seenWhaleTrades = new Set();
+

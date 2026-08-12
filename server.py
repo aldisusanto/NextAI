@@ -7,6 +7,7 @@ try:
     from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer as HTTPServer
 except ImportError:
     from http.server import SimpleHTTPRequestHandler, HTTPServer
+import base64
 import urllib.parse
 import json
 import uuid
@@ -14,6 +15,31 @@ import requests
 import xml.etree.ElementTree as ET
 import re
 import chromadb
+
+def extract_screen_ocr(clean_b64):
+    if not clean_b64:
+        return ""
+    mac_ocr_bin = os.path.join(os.path.dirname(__file__), "mac_ocr")
+    if not os.path.exists(mac_ocr_bin):
+        return ""
+    
+    tmp_path = os.path.join(tempfile.gettempdir(), f"ocr_input_{uuid.uuid4().hex[:6]}.png")
+    try:
+        with open(tmp_path, "wb") as f:
+            f.write(base64.b64decode(clean_b64))
+        
+        res = subprocess.run([mac_ocr_bin, tmp_path], capture_output=True, text=True, timeout=6)
+        if os.path.exists(tmp_path):
+            try: os.remove(tmp_path)
+            except: pass
+        if res.returncode == 0 and res.stdout.strip():
+            return res.stdout.strip()
+    except Exception as e:
+        print(f"[WARN] OCR extraction error: {e}")
+        if os.path.exists(tmp_path):
+            try: os.remove(tmp_path)
+            except: pass
+    return ""
 try:
     import fitz # PyMuPDF
 except ImportError:
@@ -174,7 +200,11 @@ class NemesisHandler(SimpleHTTPRequestHandler):
         content_length = int(self.headers.get('Content-Length', 0))
         post_data = self.rfile.read(content_length) if content_length > 0 else b""
         
-        if parsed_url.path == "/api/ingest":
+        if parsed_url.path == "/api/screen-analyze":
+            self._handle_screen_analyze(post_data)
+        elif parsed_url.path == "/api/tts":
+            self._handle_tts_post(post_data)
+        elif parsed_url.path == "/api/ingest":
             self._handle_ingest(post_data)
         elif parsed_url.path == "/api/ingest/text":
             self._handle_ingest_text(post_data)
@@ -563,7 +593,6 @@ class NemesisHandler(SimpleHTTPRequestHandler):
         except Exception as e:
             self.send_error(500, str(e))
 
-
     def _handle_voices(self):
         """Return daftar suara yang tersedia."""
         voices_list = []
@@ -591,6 +620,138 @@ class NemesisHandler(SimpleHTTPRequestHandler):
         self.send_header("Cache-Control", "no-cache")
         self.end_headers()
         self.wfile.write(json.dumps(voices_list).encode())
+
+    def _handle_tts_post(self, post_data):
+        try:
+            data = json.loads(post_data.decode('utf-8'))
+            text = data.get("text", "")
+            voice = data.get("voice", f"edge:{DEFAULT_VOICE}")
+            fake_query = f"text={urllib.parse.quote(text)}&voice={urllib.parse.quote(voice)}"
+            parsed_url = urllib.parse.urlparse(f"/api/tts?{fake_query}")
+            self._handle_tts(parsed_url)
+        except Exception as e:
+            self.send_error(500, str(e))
+
+    def _handle_screen_analyze(self, post_data):
+        try:
+            data = json.loads(post_data.decode('utf-8'))
+            prompt = data.get("prompt", "Jelaskan dan rangkum poin-poin utama dari konten di layar ini.")
+            image_b64 = data.get("image", None)
+
+            clean_b64 = None
+            if image_b64 and "," in image_b64:
+                clean_b64 = image_b64.split(",")[1]
+            elif image_b64:
+                clean_b64 = image_b64
+
+            rag_context = ""
+            emb = get_ollama_embedding(prompt)
+            if emb:
+                try:
+                    res = collection.query(query_embeddings=[emb], n_results=2)
+                    if res.get('documents') and res['documents'][0]:
+                        rag_context = "\n".join(res['documents'][0])
+                except Exception as e:
+                    print(f"[WARN] RAG query error: {e}")
+
+            # Dynamic Vision Model Detection on every request
+            target_model = "qwen2.5:3b"
+            vision_keywords = ['llava', 'vision', 'qwen2-vl', 'bakllava', 'moondream', 'minicpm', 'gemma-v']
+            is_vision_model = False
+            
+            try:
+                models_res = requests.get('http://localhost:11434/api/tags', timeout=5)
+                if models_res.status_code == 200:
+                    installed_models = [m['name'] for m in models_res.json().get('models', [])]
+                    if clean_b64:
+                        # Find best Vision model
+                        for m in installed_models:
+                            if any(vk in m.lower() for vk in vision_keywords):
+                                target_model = m
+                                is_vision_model = True
+                                break
+                    if not is_vision_model and installed_models:
+                        target_model = installed_models[0]
+            except Exception as e:
+                print(f"[WARN] Could not fetch Ollama tags: {e}")
+
+            ocr_text = ""
+            if clean_b64:
+                ocr_text = extract_screen_ocr(clean_b64)
+                if ocr_text:
+                    print(f"[Screen Analyze] Native macOS OCR extracted {len(ocr_text)} characters from screen image!")
+
+            is_diagram_req = any(k in prompt.lower() for k in ["diagram", "arsitektur", "flowchart", "erd", "sequence", "mindmap"])
+            diagram_instruction = "\n\nCatatan Khusus: Karena pengguna meminta diagram/arsitektur, buatlah sintaks Mermaid.js yang valid di dalam blok kode ```mermaid ... ``` untuk memvisualisasikan komponen dan alurnya secara jelas." if is_diagram_req else ""
+
+            if clean_b64 and ocr_text:
+                prompt_text = (
+                    "BERIKUT ADALAH KONTEN TEKS HASIL TANGKAPAN LAYAR TERKINI:\n"
+                    "==================================================\n"
+                    f"{ocr_text}\n"
+                    "==================================================\n\n"
+                    f"Instruksi Pengguna: {prompt}{diagram_instruction}\n\n"
+                    "Tugas: Jawablah instruksi pengguna secara lengkap, terstruktur, rinci, dan 100% akurat dalam Bahasa Indonesia berdasarkan konten teks layar di atas."
+                )
+            elif clean_b64:
+                prompt_text = f"Jelaskan dan rangkum poin-poin penting dari gambar layar ini dalam Bahasa Indonesia secara lengkap.{diagram_instruction}\n\nPertanyaan Pengguna: {prompt}"
+            else:
+                prompt_text = f"Konteks Pengetahuan:\n{rag_context}\n\nPermintaan Pengguna:\n{prompt}{diagram_instruction}"
+
+            reply = None
+            try:
+                payload = {
+                    "model": target_model,
+                    "prompt": prompt_text,
+                    "stream": False
+                }
+                # Always attach images if clean_b64 is present
+                if clean_b64:
+                    payload["images"] = [clean_b64]
+
+                print(f"[Screen Analyze] Sending request to Ollama model '{target_model}' (is_vision={is_vision_model})...")
+                res = requests.post('http://localhost:11434/api/generate', json=payload, timeout=60)
+                if res.status_code == 200:
+                    reply = res.json().get('response', '').strip()
+                    print(f"[Screen Analyze] Ollama response received ({len(reply)} chars)")
+
+                # Fallback: If vision model gave a single word answer like "1. Yes", retry with a direct English prompt
+                if clean_b64 and reply and len(reply) < 15:
+                    print(f"[WARN] Vision model {target_model} returned short reply '{reply}', retrying with simplified prompt...")
+                    payload["prompt"] = f"Describe and summarize all text and main content visible in this screenshot in Indonesian in detail. Question: {prompt}"
+                    retry_res = requests.post('http://localhost:11434/api/generate', json=payload, timeout=60)
+                    if retry_res.status_code == 200:
+                        alt_reply = retry_res.json().get('response', '').strip()
+                        if len(alt_reply) > len(reply):
+                            reply = alt_reply
+
+            except Exception as err:
+                print(f"[ERROR] Ollama call error: {err}")
+
+            if not reply:
+                if clean_b64 and not is_vision_model:
+                    reply = (
+                        "🚀 **Pengunduhan Otomatis Model Vision Dimulai!**\n\n"
+                        "Sistem mendeteksi model pembaca gambar belum ada di Ollama lokal Anda. **NextAI sedang mengunduh model Vision (`moondream` ~800MB) secara otomatis di latar belakang.**\n\n"
+                        "Mohon tunggu sekitar 1-2 menit hingga proses pengunduhan selesai, lalu tekan **Rangkum Layar** kembali!"
+                    )
+                elif clean_b64:
+                    reply = (
+                        f"⚠️ **Respons AI Kosong.** Model {target_model} tidak memberikan tanggapan.\n\n"
+                        f"Pastikan Ollama berjalan di `http://localhost:11434`."
+                    )
+                else:
+                    reply = f"**Pertanyaan:** *{prompt}*\n\n*(Respons NextAI Spotlight Engine).* "
+
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "success", "reply": reply}).encode('utf-8'))
+
+        except Exception as e:
+            print(f"[ERROR] Screen analyze handler error: {e}")
+            self.send_error(500, str(e))
 
     def _handle_tts(self, parsed_url):
         """Generate speech dari teks."""
